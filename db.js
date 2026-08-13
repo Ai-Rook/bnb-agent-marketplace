@@ -7,6 +7,7 @@ const db = new DatabaseSync(config.dbPath);
 
 db.exec(`
   PRAGMA journal_mode = WAL;
+  PRAGMA busy_timeout = 15000;
 `);
 
 // Migration: add agent_wallet column if missing (2026-08-13 identity backfill)

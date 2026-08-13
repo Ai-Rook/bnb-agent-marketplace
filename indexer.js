@@ -247,7 +247,14 @@ async function poolWithCommit(ids, concurrency, onDone) {
     while (idx < ids.length) {
       const id = ids[idx++];
       const rec = await indexOne(id);
-      db.upsertAgent(rec);
+      // Retry on SQLITE_BUSY (contention with the 15-min self-list refresh)
+      for (let attempt = 0; ; attempt++) {
+        try { db.upsertAgent(rec); break; }
+        catch (e) {
+          if (String(e.message).includes('locked') && attempt < 5) { await new Promise(r => setTimeout(r, 200 * (attempt + 1))); continue; }
+          throw e;
+        }
+      }
       done++;
       if (rec.parsed_ok) parsed++;
       if (rec.x402_support) x402++;
