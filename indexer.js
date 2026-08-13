@@ -168,8 +168,9 @@ const CATEGORIES = [
   {
     name: 'health-factor',
     phrases: [
-      { re: /health\s*factor|healthfactor/i, w: 5 },
-      { re: /\bliquidation\b|\bcollateral\b|\bloan\b|\bborrow\b|\bdebt\b/i, w: 3 },
+      { re: /health\s*factor|healthfactor|\bliquidation\b|\bcollateral\b/i, w: 5 },
+      { re: /\blending\b|\blend\b|\bloan\b|\bborrow\b|\bdebt\b/i, w: 4 },
+      { re: /safety\s*enforcement|policyguard|\baave\b|\bcompound\b/i, w: 4 },
     ],
   },
 ];

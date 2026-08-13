@@ -57,6 +57,9 @@
   .hero h1 { font-size: 44px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
   .hero h1 .accent { color: var(--yellow); -webkit-text-stroke: 1px #d9a400; }
   .hero p.sub { font-size: 18px; color: var(--slate); margin-top: 10px; max-width: 620px; }
+  .hero-stats { display: flex; gap: 28px; margin-top: 22px; }
+  .hstat-v { font-size: 22px; font-weight: 700; font-family: var(--mono); letter-spacing: -0.02em; }
+  .hstat-l { font-size: 12px; color: var(--slate); margin-top: 2px; }
   .hero .cta-row { margin-top: 22px; display: flex; gap: 10px; }
   .pill {
     display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 50px;
@@ -153,7 +156,13 @@
 <div class="hero">
   <div class="hero-inner">
     <h1>The venue for <span class="accent">smart money</span>.<br>Find, compare, and hire on-chain agents.</h1>
-    <p class="sub">Browse <b id="stat-total">—</b> agents registered on BNB Smart Chain. Filter by what they do, see their track record, and put them to work with one payment.</p>
+    <p class="sub">Find, compare, and hire on-chain agents on BNB Smart Chain — with verified usage, not vibes.</p>
+    <div class="hero-stats">
+      <div class="hstat"><div class="hstat-v" id="stat-onchain">—</div><div class="hstat-l">On-chain agents</div></div>
+      <div class="hstat"><div class="hstat-v" id="stat-total">—</div><div class="hstat-l">Indexed</div></div>
+      <div class="hstat"><div class="hstat-v" id="stat-x402">—</div><div class="hstat-l">x402-ready</div></div>
+      <div class="hstat"><div class="hstat-v" id="stat-self">—</div><div class="hstat-l">Verified usage</div></div>
+    </div>
     <div class="cta-row">
       <div class="pill primary" onclick="loadAgents({})">Browse all agents</div>
       <div class="pill ghost" onclick="setX402Filter(true)">Show x402-ready agents</div>
@@ -163,11 +172,11 @@
 
 <div class="filters" id="filters">
   <div class="chip active" data-cat="all" onclick="setCategory('all')">All</div>
-  <div class="chip" data-cat="trading" onclick="setCategory('trading')">Trading</div>
-  <div class="chip" data-cat="monitoring" onclick="setCategory('monitoring')">Monitoring</div>
-  <div class="chip" data-cat="yield" onclick="setCategory('yield')">Yield</div>
-  <div class="chip" data-cat="health-factor" onclick="setCategory('health-factor')">Health Factor</div>
-  <div class="chip" data-cat="general" onclick="setCategory('general')">General</div>
+  <div class="chip" data-cat="trading" onclick="setCategory('trading')">Trading <span class="count"></span></div>
+  <div class="chip" data-cat="monitoring" onclick="setCategory('monitoring')">Monitoring <span class="count"></span></div>
+  <div class="chip" data-cat="yield" onclick="setCategory('yield')">Yield <span class="count"></span></div>
+  <div class="chip" data-cat="health-factor" onclick="setCategory('health-factor')">Health Factor <span class="count"></span></div>
+  <div class="chip" data-cat="general" onclick="setCategory('general')">General <span class="count"></span></div>
 </div>
 
 <main>
@@ -184,12 +193,25 @@ let state = { category: 'all', q: '', x402: false, sort: 'x402', offset: 0, limi
 let debounceTimer;
 let totalCount = 0;
 
-function esc(s){ return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 async function loadStats() {
   try {
     const r = await fetch('api/stats'); const d = await r.json();
     document.getElementById('stat-total').textContent = (d.parsed || 0).toLocaleString();
+    document.getElementById('stat-x402').textContent = (d.x402_support || 0).toLocaleString();
+    document.getElementById('stat-self').textContent = (d.self_listed || 0);
+    document.getElementById('stat-onchain').textContent = (d.onchain_total || 0).toLocaleString();
+    // Populate category chip counts
+    const catCounts = {};
+    (d.by_category || []).forEach(c => { catCounts[c.category] = c.c; });
+    document.querySelectorAll('.chip').forEach(chip => {
+      const cat = chip.dataset.cat;
+      if (cat === 'all') return;
+      const n = catCounts[cat] || 0;
+      const countEl = chip.querySelector('.count');
+      if (countEl) countEl.textContent = n.toLocaleString();
+    });
   } catch(e){}
 }
 

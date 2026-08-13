@@ -15,7 +15,7 @@ const CATEGORIES = [
     { re: /\byield\b|\bapy\b|\bapr\b|\bstaking\b|\blending\b|\bvault\b/i, w: 4 }, { re: /liquidity\s*provision|\bfarm(ing)?\b/i, w: 3 },
   ]},
   { name: 'health-factor', phrases: [
-    { re: /health\s*factor|healthfactor/i, w: 5 }, { re: /\bliquidation\b|\bcollateral\b|\bloan\b|\bborrow\b|\bdebt\b/i, w: 3 },
+    { re: /health\s*factor|healthfactor|\bliquidation\b|\bcollateral\b/i, w: 5 }, { re: /\blending\b|\blend\b|\bloan\b|\bborrow\b|\bdebt\b/i, w: 4 }, { re: /safety\s*enforcement|policyguard|\baave\b|\bcompound\b/i, w: 4 },
   ]},
 ];
 
