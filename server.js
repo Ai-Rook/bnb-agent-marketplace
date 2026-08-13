@@ -7,6 +7,7 @@ const config = require('./config');
 const db = require('./db');
 const b402 = require('./b402');
 const selfList = require('./self-list');
+const reputation = require('./reputation');
 
 const app = express();
 app.use(express.json());
@@ -84,6 +85,20 @@ app.get('/api/agents/:id', (req, res) => {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
+});
+
+// ── Health ───────────────────────────────────────────────────────────────
+app.get('/api/health', (req, res) => {
+  res.json({
+    service: 'bnb-agent-marketplace',
+    status: 'ok',
+    indexed: db.count(),
+    parsed: db.countParsed(),
+    x402_support: db.countX402(),
+    self_listed: db.db.prepare('SELECT COUNT(*) AS c FROM agents WHERE is_self=1').get().c,
+    reputation_enabled: reputation.ENABLED,
+    onchain_total: parseInt(db.getMeta('total_agents_onchain') || '0', 10),
+  });
 });
 
 app.get('/api/stats', (req, res) => {

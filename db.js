@@ -20,6 +20,12 @@ if (!cols.includes('verified_usage')) {
 if (!cols.includes('is_self')) {
   db.exec('ALTER TABLE agents ADD COLUMN is_self INTEGER DEFAULT 0');
 }
+if (!cols.includes('reputation_score')) {
+  db.exec('ALTER TABLE agents ADD COLUMN reputation_score REAL');
+}
+if (!cols.includes('reputation_detail')) {
+  db.exec('ALTER TABLE agents ADD COLUMN reputation_detail TEXT');
+}
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS usage_history (
