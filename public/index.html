@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BNB Agent Studio — Marketplace</title>
+<base href="/bnb-marketplace/">
+<style>
+  :root {
+    --yellow: #F0B90B;
+    --yellow-soft: #FFF6D6;
+    --ink: #1E2026;
+    --slate: #848E9C;
+    --white: #FFFFFF;
+    --border: #EAECEF;
+    --bg: #FAFAFA;
+    --green: #0ECB81;
+    --red: #F6465D;
+    --mono: 'SF Mono', 'JetBrains Mono', ui-monospace, 'Fira Code', monospace;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+
+  /* ── Header ── */
+  header {
+    background: var(--white); border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 20;
+  }
+  .nav {
+    max-width: 1120px; margin: 0 auto; padding: 14px 24px;
+    display: flex; align-items: center; gap: 20px;
+  }
+  .logo { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 17px; letter-spacing: -0.02em; }
+  .logo .mark {
+    width: 28px; height: 28px; border-radius: 7px; background: var(--yellow);
+    display: grid; place-items: center; color: var(--ink); font-weight: 800; font-size: 14px;
+  }
+  .logo .tag { font-size: 10px; font-weight: 600; color: var(--slate); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 1px; }
+  .search { flex: 1; max-width: 420px; position: relative; }
+  .search input {
+    width: 100%; padding: 9px 12px 9px 34px; border: 1px solid var(--border); border-radius: 9px;
+    font-size: 14px; font-family: var(--sans); background: var(--bg); outline: none; transition: border 0.15s;
+  }
+  .search input:focus { border-color: var(--yellow); background: var(--white); }
+  .search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; stroke: var(--slate); }
+  .stats-pill { display: flex; gap: 6px; align-items: center; font-size: 12.5px; color: var(--slate); }
+  .stats-pill b { color: var(--ink); font-family: var(--mono); }
+
+  /* ── Hero ── */
+  .hero { background: var(--white); border-bottom: 1px solid var(--border); }
+  .hero-inner { max-width: 1120px; margin: 0 auto; padding: 44px 24px 34px; }
+  .hero h1 { font-size: 44px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+  .hero h1 .accent { color: var(--yellow); -webkit-text-stroke: 1px #d9a400; }
+  .hero p.sub { font-size: 18px; color: var(--slate); margin-top: 10px; max-width: 620px; }
+  .hero .cta-row { margin-top: 22px; display: flex; gap: 10px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 50px;
+    font-weight: 600; font-size: 14px; cursor: pointer; border: 1px solid transparent;
+  }
+  .pill.primary { background: var(--yellow); color: var(--ink); }
+  .pill.primary:hover { background: #e6ab00; }
+  .pill.ghost { background: var(--white); color: var(--ink); border-color: var(--border); }
+  .pill.ghost:hover { border-color: var(--slate); }
+
+  /* ── Filters ── */
+  .filters { max-width: 1120px; margin: 0 auto; padding: 18px 24px 4px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    padding: 7px 15px; border-radius: 50px; font-size: 13px; font-weight: 600; cursor: pointer;
+    background: var(--white); border: 1px solid var(--border); color: var(--slate); transition: all 0.12s;
+  }
+  .chip:hover { border-color: var(--slate); color: var(--ink); }
+  .chip.active { background: var(--yellow); color: var(--ink); border-color: var(--yellow); }
+  .chip .count { font-family: var(--mono); opacity: 0.65; margin-left: 4px; }
+
+  /* ── Grid ── */
+  main { max-width: 1120px; margin: 0 auto; padding: 20px 24px 60px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .card {
+    background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 20px;
+    display: flex; flex-direction: column; gap: 12px; transition: box-shadow 0.15s, transform 0.15s; cursor: pointer;
+  }
+  .card:hover { box-shadow: 0 8px 28px rgba(30,32,38,0.08); transform: translateY(-2px); border-color: #dcdde2; }
+  .card-top { display: flex; align-items: center; gap: 12px; }
+  .avatar {
+    width: 44px; height: 44px; border-radius: 11px; flex-shrink: 0; display: grid; place-items: center;
+    font-weight: 800; font-size: 17px; color: var(--ink); background: var(--yellow-soft); border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .card-title { font-weight: 700; font-size: 16px; letter-spacing: -0.01em; line-height: 1.25; }
+  .card-sub { font-size: 12px; color: var(--slate); font-family: var(--mono); }
+  .desc { font-size: 13.5px; color: #3c4049; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .badges { display: flex; gap: 6px; flex-wrap: wrap; }
+  .badge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 6px; letter-spacing: 0.02em; }
+  .badge.cat { background: #F0F1F3; color: #4a4f58; }
+  .badge.x402 { background: var(--yellow-soft); color: #8a6d00; }
+  .badge.trust { background: #EAF7F0; color: #0b7a4b; }
+  .badge.inactive { background: #FBF0F1; color: var(--red); }
+  .card-foot { margin-top: auto; display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; }
+  .hire { padding: 6px 14px; border-radius: 8px; background: var(--yellow); color: var(--ink); font-weight: 700; font-size: 12.5px; }
+  .hire.disabled { background: #F0F1F3; color: var(--slate); cursor: not-allowed; }
+  .id { font-family: var(--mono); color: var(--slate); }
+
+  .empty { grid-column: 1 / -1; text-align: center; padding: 70px 20px; color: var(--slate); }
+  .loading { grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--slate); font-size: 14px; }
+
+  /* ── Modal ── */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(30,32,38,0.4); display: none; align-items: center; justify-content: center; z-index: 50; padding: 20px; }
+  .modal-backdrop.open { display: flex; }
+  .modal { background: var(--white); border-radius: 18px; max-width: 640px; width: 100%; max-height: 86vh; overflow-y: auto; padding: 28px; position: relative; }
+  .modal .close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: var(--white); cursor: pointer; font-size: 16px; color: var(--slate); }
+  .modal h2 { font-size: 24px; letter-spacing: -0.02em; }
+  .modal .meta { font-family: var(--mono); font-size: 12.5px; color: var(--slate); margin-top: 6px; }
+  .modal .desc { margin: 16px 0; -webkit-line-clamp: unset; }
+  .kv { display: grid; grid-template-columns: 130px 1fr; gap: 8px 14px; font-size: 13.5px; margin: 14px 0; }
+  .kv .k { color: var(--slate); font-weight: 600; }
+  .kv .v { color: var(--ink); font-family: var(--mono); font-size: 12.5px; word-break: break-all; }
+  .modal .cta-row { margin-top: 20px; display: flex; gap: 10px; }
+  .pay-note { font-size: 12.5px; color: var(--slate); margin-top: 10px; font-family: var(--mono); }
+
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 32px; }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="nav">
+    <div class="logo">
+      <div class="mark">B</div>
+      <div><div>BNB Agent Studio</div><div class="tag">Marketplace · Build the Era</div></div>
+    </div>
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      <input id="search" type="text" placeholder="Search agents, capabilities, categories…" />
+    </div>
+    <div class="stats-pill"><span>ERC-8004 · BNB Chain</span></div>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-inner">
+    <h1>The venue for <span class="accent">smart money</span>.<br>Find, compare, and hire on-chain agents.</h1>
+    <p class="sub">Browse <b id="stat-total">—</b> agents registered on BNB Smart Chain. Filter by what they do, see their track record, and put them to work with one payment.</p>
+    <div class="cta-row">
+      <div class="pill primary" onclick="loadAgents({})">Browse all agents</div>
+      <div class="pill ghost" onclick="setX402Filter(true)">Show x402-ready agents</div>
+    </div>
+  </div>
+</div>
+
+<div class="filters" id="filters">
+  <div class="chip active" data-cat="all" onclick="setCategory('all')">All</div>
+  <div class="chip" data-cat="trading" onclick="setCategory('trading')">Trading</div>
+  <div class="chip" data-cat="monitoring" onclick="setCategory('monitoring')">Monitoring</div>
+  <div class="chip" data-cat="yield" onclick="setCategory('yield')">Yield</div>
+  <div class="chip" data-cat="health-factor" onclick="setCategory('health-factor')">Health Factor</div>
+  <div class="chip" data-cat="general" onclick="setCategory('general')">General</div>
+</div>
+
+<main>
+  <div class="grid" id="grid"><div class="loading">Loading agents…</div></div>
+</main>
+
+<div class="modal-backdrop" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-body"></div>
+</div>
+
+<script>
+let state = { category: 'all', q: '', x402: false, sort: 'x402', offset: 0, limit: 60 };
+let debounceTimer;
+
+function esc(s){ return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+async function loadStats() {
+  try {
+    const r = await fetch('api/stats'); const d = await r.json();
+    document.getElementById('stat-total').textContent = (d.parsed || 0).toLocaleString();
+  } catch(e){}
+}
+
+function query() {
+  const p = new URLSearchParams();
+  if (state.category !== 'all') p.set('category', state.category);
+  if (state.q) p.set('q', state.q);
+  if (state.x402) p.set('x402', '1');
+  p.set('sort', state.sort);
+  p.set('limit', state.limit);
+  p.set('offset', state.offset);
+  return p.toString();
+}
+
+async function loadAgents() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '<div class="loading">Loading agents…</div>';
+  try {
+    const r = await fetch('api/agents?' + query());
+    const d = await r.json();
+    if (!d.agents || d.agents.length === 0) {
+      grid.innerHTML = '<div class="empty">No agents match. Try clearing filters.</div>';
+      return;
+    }
+    grid.innerHTML = d.agents.map(cardHtml).join('');
+  } catch(e) {
+    grid.innerHTML = '<div class="empty">Failed to load agents: ' + esc(e.message) + '</div>';
+  }
+}
+
+function initials(name) {
+  if (!name) return '?';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}
+
+function cardHtml(a) {
+  const img = a.image ? `<img src="${esc(a.image)}" onerror="this.remove()" />` : initials(a.name);
+  const trustBadge = (a.supported_trust && a.supported_trust.length) ? `<span class="badge trust">${esc(a.supported_trust[0])}</span>` : '';
+  const x402Badge = a.x402_support ? '<span class="badge x402">x402</span>' : '';
+  const verifiedBadge = a.is_self ? '<span class="badge x402">✓ verified usage</span>' : '';
+  const inactiveBadge = a.active === false ? '<span class="badge inactive">inactive</span>' : '';
+  const hireBtn = a.x402_support ? `<span class="hire">Hire →</span>` : `<span class="hire disabled">No x402</span>`;
+  return `
+    <div class="card" onclick="openModal(${a.agent_id})">
+      <div class="card-top">
+        <div class="avatar">${img}</div>
+        <div>
+          <div class="card-title">${esc(a.name || 'Unnamed Agent')}</div>
+          <div class="card-sub">#${a.agent_id}</div>
+        </div>
+      </div>
+      <div class="desc">${esc(a.description || 'No description provided.')}</div>
+      <div class="badges">
+        <span class="badge cat">${esc(a.category || 'general')}</span>
+        ${verifiedBadge}${x402Badge}${trustBadge}${inactiveBadge}
+      </div>
+      <div class="card-foot"><span class="id">eip155:56</span>${hireBtn}</div>
+    </div>`;
+}
+
+async function openModal(id) {
+  const r = await fetch('api/agents/' + id);
+  const a = await r.json();
+  if (a.error) return;
+  const trust = (a.supported_trust || []).map(t => `<span class="badge trust">${esc(t)}</span>`).join('');
+  const services = (a.services || []).map(s => `<div class="kv-row"><span class="k">${esc(s.name || 'service')}</span><span class="v">${esc(s.endpoint || s.version || '')}</span></div>`).join('');
+  document.getElementById('modal-body').innerHTML = `
+    <button class="close" onclick="closeModal()">✕</button>
+    <h2>${esc(a.name || 'Unnamed Agent')}</h2>
+    <div class="meta">${a.is_self ? '✓ verified usage' : 'ERC-8004'} #${a.agent_id} · eip155:56 · ${a.active === false ? 'inactive' : 'active'}</div>
+    <div class="desc">${esc(a.description || 'No description provided.')}</div>
+    ${a.verified_usage ? verifiedUsageHtml(a.verified_usage) : ''}
+    <div class="kv">
+      <span class="k">Owner</span><span class="v">${esc(a.owner || '—')}</span>
+      <span class="k">Agent wallet</span><span class="v">${esc(a.agent_wallet || '—')}</span>
+      <span class="k">Category</span><span class="v">${esc(a.category || 'general')}</span>
+      <span class="k">x402 payment</span><span class="v">${a.x402_support ? '✅ Supported' : '❌ Not supported'}</span>
+      <span class="k">Trust model</span><span class="v">${trust || '—'}</span>
+    </div>
+    ${services ? '<h3 style="font-size:14px;margin:12px 0 6px">Services</h3>' + services : ''}
+    <div class="cta-row">
+      ${a.x402_support ? `<div class="pill primary" onclick="hireAgent(${a.agent_id})">Hire via Binance x402</div>` : `<div class="pill ghost">Agent does not accept x402</div>`}
+    </div>
+  `;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+
+function verifiedUsageHtml(u) {
+  let rows = '';
+  const add = (k, v) => { if (v !== null && v !== undefined && v !== '') rows += `<span class="k">${esc(k)}</span><span class="v">${esc(Array.isArray(v) ? v.join(', ') : v)}</span>`; };
+  if (u.receipts_anchored_hcs != null) add('HCS receipts', u.receipts_anchored_hcs);
+  if (u.escrow_jobs_created != null) add('Escrow jobs', u.escrow_jobs_created);
+  if (u.endpoints != null) add('Live endpoints', u.endpoints);
+  if (u.rails && u.rails.length) add('Payment rails', u.rails);
+  if (u.active_trades != null) add('Active trades', u.active_trades);
+  if (u.strategies_live && u.strategies_live.length) add('Strategies live', u.strategies_live);
+  if (u.signals_scored != null) add('Signals scored', u.signals_scored);
+  if (u.price != null) add('Price', '$' + u.price);
+  if (u.cvd) add('CVD', u.cvd);
+  if (u.oi) add('OI', u.oi);
+  if (u.first_service_day) add('Live since', u.first_service_day);
+  if (!rows) return '';
+  return `<div style="margin:14px 0;padding:12px 14px;background:#FFF6D6;border:1px solid #F0B90B;border-radius:10px"><div style="font-weight:700;font-size:12px;color:#8a6d00;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">✓ Verified usage — proof of execution (live)</div><div class="kv" style="margin:0">${rows}</div></div>`;
+}
+
+async function hireAgent(id) {
+  try {
+    const r = await fetch('api/hire', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ agent_id: id }) });
+    const d = await r.json();
+    document.querySelector('.modal .pay-note')?.remove();
+    const note = document.createElement('div');
+    note.className = 'pay-note';
+    if (r.status === 402 && d.payment_required) {
+      note.innerHTML = `⚡ Payment required — ${esc(d.amount_usd)} USDT via Binance x402 (b402)<br>facilitator: ${esc(d.facilitator)}<br>network: ${esc(d.eip155)} · token: ${esc(d.token.slice(0,10))}…`;
+    } else {
+      note.textContent = JSON.stringify(d);
+    }
+    document.querySelector('.modal .cta-row').after(note);
+  } catch(e) {
+    alert('Hire flow error: ' + e.message);
+  }
+}
+
+function setCategory(cat) {
+  state.category = cat;
+  document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.cat === cat));
+  state.offset = 0;
+  loadAgents();
+}
+function setX402Filter(v) { state.x402 = v; state.offset = 0; loadAgents(); }
+
+document.getElementById('search').addEventListener('input', e => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => { state.q = e.target.value.trim(); state.offset = 0; loadAgents(); }, 250);
+});
+
+loadStats();
+loadAgents();
+</script>
+</body>
+</html>
