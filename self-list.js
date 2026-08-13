@@ -67,7 +67,7 @@ async function main() {
       'Live crypto trading intelligence for AI agents — real-time BTC signals, CVD, order flow, and active strategy setups. 72 x402 endpoints, 4 payment rails. Proof-of-execution anchored on Hedera HCS + ERC-8004 reputation (Agent 59646).',
       null, 1, 1, JSON.stringify(['reputation', 'tee-attestation']),
       JSON.stringify([{ name: 'x402', endpoint: 'https://agents.ai-rook.com' }]),
-      'trading', 10, 1, null, now, JSON.stringify(usage), 1
+      'grid-trading', 10, 1, null, now, JSON.stringify(usage), 1
     );
     console.log('[self-list] Rook Trading Intelligence seeded with verified usage');
   } else {

@@ -36,6 +36,18 @@ db.exec(`
     usage      TEXT
   );
   CREATE INDEX IF NOT EXISTS idx_usage_history ON usage_history(agent_id, fetched_at);
+  CREATE TABLE IF NOT EXISTS hires (
+    idempotency_key TEXT PRIMARY KEY,
+    agent_id        INTEGER,
+    settle_tx       TEXT,
+    payer           TEXT,
+    network         TEXT,
+    amount_usd      TEXT,
+    task            TEXT,
+    status          TEXT,
+    receipt         TEXT,
+    created_at      TEXT
+  );
 `);
 
 db.exec(`

@@ -42,7 +42,8 @@ app.get('/api/agents', (req, res) => {
     const off = parseInt(offset, 10) || 0;
 
     let orderBy = 'is_self DESC, x402_support DESC, agent_id ASC';
-    if (sort === 'x402') orderBy = 'is_self DESC, x402_support DESC, agent_id ASC';
+    if (sort === 'trust') orderBy = 'is_self DESC, x402_support DESC, agent_id ASC';
+    else if (sort === 'x402') orderBy = 'x402_support DESC, is_self DESC, agent_id ASC';
     else if (sort === 'category') orderBy = 'is_self DESC, category ASC, agent_id ASC';
 
     const rows = db.db.prepare(`
@@ -128,8 +129,9 @@ app.get('/api/usage-history/:agentId', (req, res) => {
 // ── b402 hire flow — 402 challenge → verify → settle ─────────────────────
 app.post('/api/hire', async (req, res) => {
   try {
-    const { agent_id, task } = req.body || {};
+    const { agent_id, task, idempotency_key } = req.body || {};
     const paymentHeader = req.headers['x-payment'] || req.headers['payment-signature'];
+    const idemKey = idempotency_key || req.headers['x-idempotency-key'] || null;
 
     if (agent_id === null || agent_id === undefined) return res.status(400).json({ error: 'agent_id required' });
     const row = db.db.prepare('SELECT agent_id, name, x402_support FROM agents WHERE agent_id = ?').get(parseInt(agent_id, 10));
@@ -138,20 +140,37 @@ app.post('/api/hire', async (req, res) => {
       return res.status(402).json({ error: 'agent does not accept x402 payments', agent: row, payment_required: false });
     }
 
+    // Idempotency: if this key was already settled, replay the receipt (no double-settle)
+    if (idemKey) {
+      const prior = db.db.prepare('SELECT * FROM hires WHERE idempotency_key = ?').get(idemKey);
+      if (prior && prior.status === 'settled') {
+        return res.json(JSON.parse(prior.receipt));
+      }
+      if (prior && prior.status === 'pending') {
+        return res.status(202).json({ error: 'payment settlement in progress — retry with same idempotency key', status: 'pending' });
+      }
+    }
+
     if (!paymentHeader) {
       // No payment yet → issue 402 challenge with b402 payment requirements
       const challenge = b402.paymentChallenge(`Hire agent #${row.agent_id} (${row.name})`);
       return res.status(402).set('X-PAYMENT-RESPONSE', JSON.stringify(challenge)).json(challenge);
     }
 
+    if (idemKey) {
+      db.db.prepare('INSERT OR REPLACE INTO hires (idempotency_key, agent_id, status, created_at) VALUES (?,?,?,?)')
+        .run(idemKey, row.agent_id, 'pending', new Date().toISOString());
+    }
+
     // Payment header present → verify + settle via b402 facilitator
     const result = await b402.verifySettle(paymentHeader);
     if (!result.ok) {
-      return res.status(402).json({ error: result.error });
+      if (idemKey) db.db.prepare('DELETE FROM hires WHERE idempotency_key = ?').run(idemKey);
+      return res.status(402).json({ error: result.error, status: 'payment_failed' });
     }
 
-    // Payment settled — deliver the hire result
-    res.json({
+    // Payment settled — build receipt, store it idempotently, deliver
+    const receipt = {
       status: 'hired',
       agent: row,
       task: task || null,
@@ -166,10 +185,17 @@ app.post('/api/hire', async (req, res) => {
         amount_usd: '0.50',
         currency: 'USDT',
         facilitator: config.b402Facilitator,
+        settle_tx: result.settleTx,
+        failure_mode: 'Settlement is confirmed on-chain before delivery. If the response is lost in transit, retry with the SAME X-Idempotency-Key header — you will receive the same receipt, not a double charge.',
       },
-    });
+    };
+    if (idemKey) {
+      db.db.prepare('UPDATE hires SET status=?, settle_tx=?, payer=?, network=?, amount_usd=?, task=?, receipt=? WHERE idempotency_key=?')
+        .run('settled', result.settleTx, result.payer, result.network, '0.50', task || null, JSON.stringify(receipt), idemKey);
+    }
+    res.json(receipt);
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: e.message, status: 'internal_error' });
   }
 });
 

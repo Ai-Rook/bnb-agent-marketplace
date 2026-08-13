@@ -145,7 +145,7 @@ function parseRegistration(text) {
 // staking~45, security~59, monitor~24, perpetual~44, arbitrage~4, liquidation~0.
 const CATEGORIES = [
   {
-    name: 'trading',
+    name: 'grid-trading',
     phrases: [
       { re: /\btrading\b|\btrade\b|\bperpetual\b|\bfutures\b/i, w: 4 },
       { re: /\bscalp|arbitrage|mean\s*reversion|risk-managed|technical\s*analysis/i, w: 3 },

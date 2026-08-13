@@ -146,7 +146,8 @@
     </div>
     <label class="toggle-x402" title="Only agents that accept x402 payments"><input type="checkbox" id="x402toggle" onchange="setX402Filter(this.checked)" /> x402 only</label>
     <select id="sort" class="sort" onchange="setSort(this.value)">
-      <option value="x402">Sort: Verified + x402</option>
+      <option value="trust">Sort: Trust (verified usage first)</option>
+      <option value="x402">Sort: x402-ready</option>
       <option value="category">Sort: Category</option>
     </select>
     <div class="stats-pill"><span>ERC-8004 · BNB Chain</span></div>
@@ -172,7 +173,7 @@
 
 <div class="filters" id="filters">
   <div class="chip active" data-cat="all" onclick="setCategory('all')">All</div>
-  <div class="chip" data-cat="trading" onclick="setCategory('trading')">Trading <span class="count"></span></div>
+  <div class="chip" data-cat="grid-trading" onclick="setCategory('grid-trading')">Grid Trading <span class="count"></span></div>
   <div class="chip" data-cat="monitoring" onclick="setCategory('monitoring')">Monitoring <span class="count"></span></div>
   <div class="chip" data-cat="yield" onclick="setCategory('yield')">Yield <span class="count"></span></div>
   <div class="chip" data-cat="health-factor" onclick="setCategory('health-factor')">Health Factor <span class="count"></span></div>
@@ -189,7 +190,7 @@
 </div>
 
 <script>
-let state = { category: 'all', q: '', x402: false, sort: 'x402', offset: 0, limit: 60 };
+let state = { category: 'all', q: '', x402: false, sort: 'trust', offset: 0, limit: 60 };
 let debounceTimer;
 let totalCount = 0;
 

@@ -5,7 +5,7 @@ const db = require('./db');
 
 // Mirrors indexer.js deriveCategory (data-calibrated regex version)
 const CATEGORIES = [
-  { name: 'trading', phrases: [
+  { name: 'grid-trading', phrases: [
     { re: /\btrading\b|\btrade\b|\bperpetual\b|\bfutures\b/i, w: 4 }, { re: /\bscalp|arbitrage|mean\s*reversion|risk-managed|technical\s*analysis/i, w: 3 },
   ]},
   { name: 'monitoring', phrases: [
