@@ -47,6 +47,9 @@
   .search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; stroke: var(--slate); }
   .stats-pill { display: flex; gap: 6px; align-items: center; font-size: 12.5px; color: var(--slate); }
   .stats-pill b { color: var(--ink); font-family: var(--mono); }
+  .toggle-x402 { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--ink); cursor: pointer; white-space: nowrap; }
+  .toggle-x402 input { accent-color: var(--yellow); width: 15px; height: 15px; }
+  .sort { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: var(--sans); background: var(--white); color: var(--ink); cursor: pointer; outline: none; }
 
   /* ── Hero ── */
   .hero { background: var(--white); border-bottom: 1px solid var(--border); }
@@ -105,6 +108,7 @@
 
   .empty { grid-column: 1 / -1; text-align: center; padding: 70px 20px; color: var(--slate); }
   .loading { grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--slate); font-size: 14px; }
+  .load-more-wrap { grid-column: 1 / -1; text-align: center; padding: 10px 0 30px; }
 
   /* ── Modal ── */
   .modal-backdrop { position: fixed; inset: 0; background: rgba(30,32,38,0.4); display: none; align-items: center; justify-content: center; z-index: 50; padding: 20px; }
@@ -137,6 +141,11 @@
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
       <input id="search" type="text" placeholder="Search agents, capabilities, categories…" />
     </div>
+    <label class="toggle-x402" title="Only agents that accept x402 payments"><input type="checkbox" id="x402toggle" onchange="setX402Filter(this.checked)" /> x402 only</label>
+    <select id="sort" class="sort" onchange="setSort(this.value)">
+      <option value="x402">Sort: Verified + x402</option>
+      <option value="category">Sort: Category</option>
+    </select>
     <div class="stats-pill"><span>ERC-8004 · BNB Chain</span></div>
   </div>
 </header>
@@ -163,6 +172,7 @@
 
 <main>
   <div class="grid" id="grid"><div class="loading">Loading agents…</div></div>
+  <div class="load-more-wrap" id="load-more-wrap" style="display:none"><div class="pill ghost" onclick="loadMore()">Load more</div></div>
 </main>
 
 <div class="modal-backdrop" id="modal" onclick="if(event.target===this)closeModal()">
@@ -172,6 +182,7 @@
 <script>
 let state = { category: 'all', q: '', x402: false, sort: 'x402', offset: 0, limit: 60 };
 let debounceTimer;
+let totalCount = 0;
 
 function esc(s){ return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
@@ -199,13 +210,29 @@ async function loadAgents() {
   try {
     const r = await fetch('api/agents?' + query());
     const d = await r.json();
+    totalCount = d.total || 0;
     if (!d.agents || d.agents.length === 0) {
       grid.innerHTML = '<div class="empty">No agents match. Try clearing filters.</div>';
+      document.getElementById('load-more-wrap').style.display = 'none';
       return;
     }
     grid.innerHTML = d.agents.map(cardHtml).join('');
+    document.getElementById('load-more-wrap').style.display = (state.offset + state.limit < totalCount) ? 'block' : 'none';
   } catch(e) {
     grid.innerHTML = '<div class="empty">Failed to load agents: ' + esc(e.message) + '</div>';
+  }
+}
+
+async function loadMore() {
+  state.offset += state.limit;
+  try {
+    const r = await fetch('api/agents?' + query());
+    const d = await r.json();
+    if (!d.agents || d.agents.length === 0) { document.getElementById('load-more-wrap').style.display = 'none'; return; }
+    document.getElementById('grid').insertAdjacentHTML('beforeend', d.agents.map(cardHtml).join(''));
+    document.getElementById('load-more-wrap').style.display = (state.offset + state.limit < totalCount) ? 'block' : 'none';
+  } catch(e) {
+    document.getElementById('load-more-wrap').style.display = 'none';
   }
 }
 
@@ -253,6 +280,7 @@ async function openModal(id) {
     <div class="meta">${a.is_self ? '✓ verified usage' : 'ERC-8004'} #${a.agent_id} · eip155:56 · ${a.active === false ? 'inactive' : 'active'}</div>
     <div class="desc">${esc(a.description || 'No description provided.')}</div>
     ${a.verified_usage ? verifiedUsageHtml(a.verified_usage) : ''}
+    ${a.is_self ? '<div id="usage-trend"></div>' : ''}
     <div class="kv">
       <span class="k">Owner</span><span class="v">${esc(a.owner || '—')}</span>
       <span class="k">Agent wallet</span><span class="v">${esc(a.agent_wallet || '—')}</span>
@@ -265,6 +293,7 @@ async function openModal(id) {
       ${a.x402_support ? `<div class="pill primary" onclick="hireAgent(${a.agent_id})">Hire via Binance x402</div>` : `<div class="pill ghost">Agent does not accept x402</div>`}
     </div>
   `;
+  if (a.is_self) usageTrendHtml(a.agent_id).then(h => { const el = document.getElementById('usage-trend'); if (el) el.innerHTML = h; });
   document.getElementById('modal').classList.add('open');
 }
 
@@ -284,8 +313,22 @@ function verifiedUsageHtml(u) {
   if (u.cvd) add('CVD', u.cvd);
   if (u.oi) add('OI', u.oi);
   if (u.first_service_day) add('Live since', u.first_service_day);
+  if (u.fetched_at) add('Last verified', new Date(u.fetched_at).toLocaleString());
   if (!rows) return '';
   return `<div style="margin:14px 0;padding:12px 14px;background:#FFF6D6;border:1px solid #F0B90B;border-radius:10px"><div style="font-weight:700;font-size:12px;color:#8a6d00;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">✓ Verified usage — proof of execution (live)</div><div class="kv" style="margin:0">${rows}</div></div>`;
+}
+
+async function usageTrendHtml(agentId) {
+  try {
+    const r = await fetch('api/usage-history/' + agentId);
+    const d = await r.json();
+    if (!d.snapshots || d.snapshots.length < 2) return '';
+    const n = d.snapshots.length;
+    const first = d.snapshots[0]; const last = d.snapshots[n - 1];
+    const spanMs = new Date(last.fetched_at) - new Date(first.fetched_at);
+    const mins = Math.max(1, Math.round(spanMs / 60000));
+    return `<div style="margin:12px 0;font-size:12.5px;color:#3c4049"><strong>Uptime tracking:</strong> ${n} verifications over ${mins} min — proof-of-execution is re-fetched live, not a static claim.</div>`;
+  } catch(e) { return ''; }
 }
 
 async function hireAgent(id) {
@@ -312,6 +355,7 @@ function setCategory(cat) {
   state.offset = 0;
   loadAgents();
 }
+function setSort(v) { state.sort = v; state.offset = 0; loadAgents(); }
 function setX402Filter(v) { state.x402 = v; state.offset = 0; loadAgents(); }
 
 document.getElementById('search').addEventListener('input', e => {
