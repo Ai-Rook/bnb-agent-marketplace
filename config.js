@@ -6,8 +6,16 @@ module.exports = {
   chainId: 56,
   eip155: 'eip155:56',
 
-  // Public RPC (verified working: bsc-rpc.publicnode.com)
+  // Public RPC with fallback list (first is primary; others tried on failure)
   rpc: process.env.BSC_RPC || 'https://bsc-rpc.publicnode.com',
+  rpcList: [
+    process.env.BSC_RPC || 'https://bsc-rpc.publicnode.com',
+    'https://bsc-dataseed1.binance.org',
+    'https://bsc-dataseed2.binance.org',
+    'https://bsc-dataseed.binance.org',
+    'https://1rpc.io/bnb',
+    'https://bsc.publicnode.com',
+  ],
 
   // ERC-8004 registries on BSC mainnet
   identityRegistry: '0x8004A169FB4a3325136EB29fA0ceB6D2e539a432',
@@ -19,8 +27,9 @@ module.exports = {
 
   // b402 (Binance x402) facilitator
   b402Facilitator: process.env.BNB_FACILITATOR_URL || 'https://facilitator.b402.ai',
-  bnbNetwork: process.env.BNB_NETWORK || 'bsc-testnet', // testnet=97, mainnet=56
-  bnbPayTo: process.env.BNB_PAY_TO || '0x1af8369db07255cd2fd394b8b59926b59b58f92b',
+  bnbNetwork: process.env.BNB_NETWORK || 'bsc', // mainnet=56 (real settlement)
+  bnbPayTo: process.env.BNB_PAY_TO || '0xb680B333211Ac2B670b080beE6267d1173c81049',
+  walletKeyPath: '/opt/bnb-marketplace/bsc-wallet.key',
   // USDT on BSC mainnet / testnet
   usdtMainnet: '0x55d398326f99059fF775485246999027B3197955',
   usdtTestnet: '0x337610d27c682E347C9cD60BD4b3b107C9d34dDd',

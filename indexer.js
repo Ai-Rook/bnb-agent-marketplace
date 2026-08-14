@@ -27,27 +27,30 @@ const limit = parseInt(arg('--limit', '0'), 10); // 0 = no limit
 const sample = args.includes('--sample');
 const sampleEvery = parseInt(arg('--sample-every', '500'), 10);
 
-// ── JSON-RPC helper (with retry/backoff) ────────────────────────────────────
-async function rpc(method, params, retries = 4) {
+// ── JSON-RPC helper (with retry/backoff + RPC fallback list) ────────────────────
+async function rpc(method, params, retries = 2) {
+  const rpcs = (config.rpcList && config.rpcList.length) ? config.rpcList : [config.rpc];
   let lastErr;
-  for (let attempt = 0; attempt <= retries; attempt++) {
-    try {
-      const res = await fetch(config.rpc, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
-        signal: AbortSignal.timeout(15000),
-      });
-      if (res.status === 429 || res.status >= 500) {
-        throw new Error('HTTP ' + res.status);
-      }
-      const j = await res.json();
-      if (j.error) throw new Error(j.error.message || JSON.stringify(j.error));
-      return j.result;
-    } catch (e) {
-      lastErr = e;
-      if (attempt < retries) {
-        await new Promise(r => setTimeout(r, 500 * Math.pow(2, attempt)));
+  for (const rpcUrl of rpcs) {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const res = await fetch(rpcUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
+          signal: AbortSignal.timeout(15000),
+        });
+        if (res.status === 429 || res.status >= 500) {
+          throw new Error('HTTP ' + res.status);
+        }
+        const j = await res.json();
+        if (j.error) throw new Error(j.error.message || JSON.stringify(j.error));
+        return j.result;
+      } catch (e) {
+        lastErr = e;
+        if (attempt < retries) {
+          await new Promise(r => setTimeout(r, 500 * Math.pow(2, attempt)));
+        }
       }
     }
   }
