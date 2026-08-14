@@ -189,6 +189,17 @@ app.post('/api/hire', async (req, res) => {
         failure_mode: 'Settlement is confirmed on-chain before delivery. If the response is lost in transit, retry with the SAME X-Idempotency-Key header — you will receive the same receipt, not a double charge.',
       },
     };
+
+    // BSC proof-of-execution anchor (best-effort — never blocks a settled hire)
+    try {
+      const { anchorReceipt } = require('./anchor');
+      const anchor = await anchorReceipt({ agent_id: row.agent_id, settle_tx: result.settleTx, payer: result.payer, amount_usd: '0.50' }, 'hire');
+      receipt.receipt.bsc_anchor = { hash: anchor.hash, tx: anchor.txHash };
+      console.log('[bnb-marketplace] BSC anchor:', anchor.txHash);
+    } catch (e) {
+      console.warn('[bnb-marketplace] BSC anchor skipped:', e.message);
+    }
+
     if (idemKey) {
       db.db.prepare('UPDATE hires SET status=?, settle_tx=?, payer=?, network=?, amount_usd=?, task=?, receipt=? WHERE idempotency_key=?')
         .run('settled', result.settleTx, result.payer, result.network, '0.50', task || null, JSON.stringify(receipt), idemKey);
