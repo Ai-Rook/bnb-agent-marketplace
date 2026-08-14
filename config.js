@@ -26,7 +26,7 @@ module.exports = {
   lastIdSlot: '0xa040f782729de4970518741823ec1276cbcd41a0c7493f62d173341566a04e00',
 
   // b402 (Binance x402) facilitator
-  b402Facilitator: process.env.BNB_FACILITATOR_URL || 'https://pay.binance.com',
+  b402Facilitator: process.env.B402_BASE_URL || process.env.BNB_FACILITATOR_URL || '',
   bnbNetwork: process.env.BNB_NETWORK || 'bsc', // mainnet=56 (real settlement)
   bnbPayTo: process.env.BNB_PAY_TO || '0xb680B333211Ac2B670b080beE6267d1173c81049',
   walletKeyPath: '/opt/bnb-marketplace/bsc-wallet.key',

@@ -10,8 +10,11 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "@bnb-chain/b402": "^0.1.0",
     "@x402/core": "^2.19.0",
+    "@x402/fetch": "^2.22.0",
     "ethers": "^6.17.0",
-    "express": "^4.22.2"
+    "express": "^4.22.2",
+    "viem": "^2.55.16"
   }
 }
