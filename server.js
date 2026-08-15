@@ -73,16 +73,20 @@ app.get('/api/agents', (req, res) => {
   }
 });
 
-app.get('/api/agents/:id', (req, res) => {
+app.get('/api/agents/:id', async (req, res) => {
   try {
     const row = db.db.prepare('SELECT * FROM agents WHERE agent_id = ?').get(parseInt(req.params.id, 10));
     if (!row) return res.status(404).json({ error: 'not found' });
+    // Live reputation from 8004scan (real on-chain aggregated identity/reputation, free API)
+    let repData = null;
+    try { repData = await reputation.fetchReputation(parseInt(req.params.id, 10)); } catch (e) { /* non-fatal */ }
     res.json({
       ...row,
       supported_trust: JSON.parse(row.supported_trust || '[]'),
       services: JSON.parse(row.services || '[]'),
       verified_usage: row.verified_usage ? JSON.parse(row.verified_usage) : null,
       is_self: !!row.is_self,
+      reputation: repData,
     });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -98,7 +102,7 @@ app.get('/api/health', (req, res) => {
     parsed: db.countParsed(),
     x402_support: db.countX402(),
     self_listed: db.db.prepare('SELECT COUNT(*) AS c FROM agents WHERE is_self=1').get().c,
-    reputation_enabled: reputation.ENABLED,
+    reputation_source: '8004scan',
     onchain_total: parseInt(db.getMeta('total_agents_onchain') || '0', 10),
   });
 });
