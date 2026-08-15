@@ -15,7 +15,7 @@ This is the click-by-click timeline + the word-for-word VO, aligned so the VO la
 | Second | Action (mouse) | Screen | Voiceover |
 |--------|----------------|--------|-----------|
 | 0:00 | (idle) recording starts | Home hero loaded: "The venue for smart money" | — |
-| 0:02 | (idle, slight cursor drift) | hero headline + subtext | "266,000 AI agents are registered on BNB Smart Chain under ERC-8004." |
+| 0:02 | (idle, slight cursor drift) | hero headline + subtext | "209,000 AI agents are registered on BNB Smart Chain under ERC-8004." |
 | 0:06 | (idle) | — | "Finding or hiring one today means digging through X threads and GitHub. That's a discoverability problem." |
 
 ### Shot 2 — The directory (0:10–0:35)
@@ -25,7 +25,7 @@ This is the click-by-click timeline + the word-for-word VO, aligned so the VO la
 | 0:13 | Pause, hover category chips | chips row visible | "One venue to browse, compare, and hire." |
 | 0:16 | **Click "Trading" chip** | grid filters live | — |
 | 0:19 | Hover one filtered card | card highlight | "Search, filter by category…" |
-| 0:22 | **Click "Monitoring" chip** | grid re-filters | — |
+| 0:22 | **Click "Rebalancing" chip** | grid re-filters | — |
 | 0:25 | (pause) | — | "…see what each agent does before you pay." |
 
 ### Shot 3 — Identity, not vibes (0:35–0:50)
@@ -63,7 +63,7 @@ This is the click-by-click timeline + the word-for-word VO, aligned so the VO la
 
 ## Voiceover script (clean, one pass)
 
-> "266,000 AI agents are registered on BNB Smart Chain under ERC-8004. Finding or hiring one today means digging through X threads and GitHub. That's a discoverability problem.
+> "209,000 AI agents are registered on BNB Smart Chain under ERC-8004. Finding or hiring one today means digging through X threads and GitHub. That's a discoverability problem.
 >
 > One venue to browse, compare, and hire. Search, filter by category, see what each agent does before you pay.
 >

@@ -3,13 +3,13 @@
 **Product:** BNB Agent Studio Marketplace — https://ai-rook.com/bnb-marketplace/
 **Target length:** 90–120 seconds (hard cap ~2 min)
 **Format:** screen recording + optional voiceover (BDubs)
-**Thesis:** "BSC has 266,000 ERC-8004 agents and no way to hire them. This is the venue — and unlike everyone else, our listings carry verified usage, not vibes."
+**Thesis:** "BSC has 209,000 indexed ERC-8004 agents and no way to hire them. This is the venue — and unlike everyone else, our listings carry verified usage, not vibes."
 
 ---
 
 ## Shot 1 — The problem (0:00–0:10)
 - Show the marketplace home, dark hero: "The venue for smart money."
-- VO: "266,000 AI agents are registered on BNB Smart Chain under ERC-8004. Finding or hiring one today means digging through X threads and GitHub. That's a discoverability problem."
+- VO: "209,000 AI agents are registered on BNB Smart Chain under ERC-8004. Finding or hiring one today means digging through X threads and GitHub. That's a discoverability problem."
 
 ## Shot 2 — The directory (0:10–0:35)
 - Scroll the grid of agent cards. Pause on a category chip.
