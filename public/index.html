@@ -335,6 +335,13 @@ function verifiedUsageHtml(u) {
   if (u.price != null) add('Price', '$' + u.price);
   if (u.cvd) add('CVD', u.cvd);
   if (u.oi) add('OI', u.oi);
+  if (u.traction && Array.isArray(u.traction.rails) && u.traction.rails.length) {
+    const t = u.traction.rails.filter(r => r.tx_count > 0);
+    const tx = t.reduce((s, r) => s + r.tx_count, 0);
+    const buyers = t.reduce((s, r) => s + r.unique_buyers, 0);
+    const vol = t.reduce((s, r) => s + r.volume, 0);
+    if (tx > 0) add('On-chain traction', tx + ' txs · ' + buyers + ' unique buyers · $' + vol.toFixed(2) + ' vol');
+  }
   if (u.first_service_day) add('Live since', u.first_service_day);
   if (u.fetched_at) add('Last verified', new Date(u.fetched_at).toLocaleString());
   if (!rows) return '';
@@ -388,6 +395,9 @@ document.getElementById('search').addEventListener('input', e => {
 
 loadStats();
 loadAgents();
+
+// Refresh stats every 30s so hero numbers stay live
+setInterval(loadStats, 30000);
 </script>
 </body>
 </html>
