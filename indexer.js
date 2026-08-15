@@ -155,10 +155,10 @@ const CATEGORIES = [
     ],
   },
   {
-    name: 'monitoring',
+    name: 'rebalancing',
     phrases: [
-      { re: /\bmonitor|security|alert|watchlist|surveillance|observability/i, w: 4 },
-      { re: /track(ing)?\s*(wallets|positions|markets|prices)/i, w: 4 },
+      { re: /\brebalanc|re-balanc|reallocat|re-allocat|asset\s*allocation/i, w: 5 },
+      { re: /\bportfolio\b|position\s*sizing|risk\s*parity/i, w: 3 },
     ],
   },
   {
@@ -174,6 +174,7 @@ const CATEGORIES = [
       { re: /health\s*factor|healthfactor|\bliquidation\b|\bcollateral\b/i, w: 5 },
       { re: /\blending\b|\blend\b|\bloan\b|\bborrow\b|\bdebt\b/i, w: 4 },
       { re: /safety\s*enforcement|policyguard|\baave\b|\bcompound\b/i, w: 4 },
+      { re: /\bmonitor|security|alert|watchlist|surveillance|observability|track/i, w: 4 },
     ],
   },
 ];

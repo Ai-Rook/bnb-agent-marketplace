@@ -69,6 +69,9 @@
   .pill.primary:hover { background: #e6ab00; }
   .pill.ghost { background: var(--white); color: var(--ink); border-color: var(--border); }
   .pill.ghost:hover { border-color: var(--slate); }
+  .feature-strip { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+  .feat { font-size: 12px; font-weight: 600; color: #4a4f58; background: var(--bg); border: 1px solid var(--border); padding: 5px 12px; border-radius: 50px; }
+  .badge.rep { background: #FDF6E3; color: #8a6d00; }
 
   /* ── Filters ── */
   .filters { max-width: 1120px; margin: 0 auto; padding: 18px 24px 4px; display: flex; gap: 8px; flex-wrap: wrap; }
@@ -157,7 +160,7 @@
 <div class="hero">
   <div class="hero-inner">
     <h1>The venue for <span class="accent">smart money</span>.<br>Find, compare, and hire on-chain agents.</h1>
-    <p class="sub">Find, compare, and hire on-chain agents on BNB Smart Chain — with verified usage, not vibes.</p>
+    <p class="sub">Browse, compare, and hire on-chain agents across grid trading, rebalancing, yield, and health-factor monitoring — with real reputation from 8004scan, not static counts.</p>
     <div class="hero-stats">
       <div class="hstat"><div class="hstat-v" id="stat-onchain">—</div><div class="hstat-l">On-chain agents</div></div>
       <div class="hstat"><div class="hstat-v" id="stat-total">—</div><div class="hstat-l">Indexed</div></div>
@@ -168,13 +171,19 @@
       <div class="pill primary" onclick="loadAgents({})">Browse all agents</div>
       <div class="pill ghost" onclick="setX402Filter(true)">Show x402-ready agents</div>
     </div>
+    <div class="feature-strip">
+      <span class="feat">🔑 Altana session keys</span>
+      <span class="feat">⭐ 8004scan reputation</span>
+      <span class="feat">🛡️ ERC-8183 escrow</span>
+      <span class="feat">⚡ Binance x402 (b402)</span>
+    </div>
   </div>
 </div>
 
 <div class="filters" id="filters">
   <div class="chip active" data-cat="all" onclick="setCategory('all')">All</div>
   <div class="chip" data-cat="grid-trading" onclick="setCategory('grid-trading')">Grid Trading <span class="count"></span></div>
-  <div class="chip" data-cat="monitoring" onclick="setCategory('monitoring')">Monitoring <span class="count"></span></div>
+  <div class="chip" data-cat="rebalancing" onclick="setCategory('rebalancing')">Rebalancing <span class="count"></span></div>
   <div class="chip" data-cat="yield" onclick="setCategory('yield')">Yield <span class="count"></span></div>
   <div class="chip" data-cat="health-factor" onclick="setCategory('health-factor')">Health Factor <span class="count"></span></div>
   <div class="chip" data-cat="general" onclick="setCategory('general')">General <span class="count"></span></div>
@@ -272,6 +281,7 @@ function cardHtml(a) {
   const x402Badge = a.x402_support ? '<span class="badge x402">x402</span>' : '';
   const verifiedBadge = a.is_self ? '<span class="badge x402">✓ verified usage</span>' : '';
   const inactiveBadge = a.active === false ? '<span class="badge inactive">inactive</span>' : '';
+  const repBadge = a.reputation_score != null ? `<span class="badge rep">★ ${a.reputation_score}</span>` : '';
   const hireBtn = a.x402_support ? `<span class="hire">Hire →</span>` : `<span class="hire disabled">No x402</span>`;
   return `
     <div class="card" onclick="openModal(${a.agent_id})">
@@ -285,7 +295,7 @@ function cardHtml(a) {
       <div class="desc">${esc(a.description || 'No description provided.')}</div>
       <div class="badges">
         <span class="badge cat">${esc(a.category || 'general')}</span>
-        ${verifiedBadge}${x402Badge}${trustBadge}${inactiveBadge}
+        ${verifiedBadge}${repBadge}${x402Badge}${trustBadge}${inactiveBadge}
       </div>
       <div class="card-foot"><span class="id">eip155:56</span>${hireBtn}</div>
     </div>`;
@@ -311,6 +321,7 @@ async function openModal(id) {
       <span class="k">x402 payment</span><span class="v">${a.x402_support ? '✅ Supported' : '❌ Not supported'}</span>
       <span class="k">Trust model</span><span class="v">${trust || '—'}</span>
     </div>
+    ${reputationHtml(a.reputation)}
     ${services ? '<h3 style="font-size:14px;margin:12px 0 6px">Services</h3>' + services : ''}
     <div class="cta-row">
       ${a.x402_support ? `<div class="pill primary" onclick="hireAgent(${a.agent_id})">Hire via Binance x402</div>` : `<div class="pill ghost">Agent does not accept x402</div>`}
@@ -318,6 +329,23 @@ async function openModal(id) {
   `;
   if (a.is_self) usageTrendHtml(a.agent_id).then(h => { const el = document.getElementById('usage-trend'); if (el) el.innerHTML = h; });
   document.getElementById('modal').classList.add('open');
+}
+
+function reputationHtml(rep) {
+  if (!rep || rep.total_feedbacks == null) return '';
+  const score = rep.total_score != null ? rep.total_score : '—';
+  const avg = rep.average_score != null ? rep.average_score : '—';
+  return `<div style="margin:14px 0;padding:12px 14px;background:#FAFAFA;border:1px solid var(--border);border-radius:10px">
+    <div style="font-weight:700;font-size:12px;color:var(--slate);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Reputation — 8004scan (on-chain)</div>
+    <div class="kv" style="margin:0">
+      <span class="k">Score</span><span class="v">${score}</span>
+      <span class="k">Avg rating</span><span class="v">${avg}</span>
+      <span class="k">Feedbacks</span><span class="v">${esc(rep.total_feedbacks)}</span>
+      <span class="k">Rank</span><span class="v">${rep.rank != null ? esc(rep.rank) : '—'}</span>
+      <span class="k">Owner</span><span class="v">${esc(rep.owner_address || '—')}</span>
+      <span class="k">Verified</span><span class="v">${rep.is_verified ? '✅ verified' : '—'}</span>
+    </div>
+  </div>`;
 }
 
 function closeModal(){ document.getElementById('modal').classList.remove('open'); }

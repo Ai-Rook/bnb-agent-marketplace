@@ -49,7 +49,7 @@ app.get('/api/agents', (req, res) => {
 
     const rows = db.db.prepare(`
       SELECT agent_id, owner, agent_wallet, name, description, image, active, x402_support,
-        supported_trust, services, category, category_score, indexed_at, verified_usage, is_self
+        supported_trust, services, category, category_score, indexed_at, verified_usage, is_self, reputation_score
       FROM agents ${whereClause}
       ORDER BY ${orderBy} LIMIT ? OFFSET ?
     `).all(...params, lim, off);

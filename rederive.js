@@ -8,14 +8,14 @@ const CATEGORIES = [
   { name: 'grid-trading', phrases: [
     { re: /\btrading\b|\btrade\b|\bperpetual\b|\bfutures\b/i, w: 4 }, { re: /\bscalp|arbitrage|mean\s*reversion|risk-managed|technical\s*analysis/i, w: 3 },
   ]},
-  { name: 'monitoring', phrases: [
-    { re: /\bmonitor|security|alert|watchlist|surveillance|observability/i, w: 4 }, { re: /track(ing)?\s*(wallets|positions|markets|prices)/i, w: 4 },
+  { name: 'rebalancing', phrases: [
+    { re: /\brebalanc|re-balanc|reallocat|re-allocat|asset\s*allocation/i, w: 5 }, { re: /\bportfolio\b|position\s*sizing|risk\s*parity/i, w: 3 },
   ]},
   { name: 'yield', phrases: [
     { re: /\byield\b|\bapy\b|\bapr\b|\bstaking\b|\blending\b|\bvault\b/i, w: 4 }, { re: /liquidity\s*provision|\bfarm(ing)?\b/i, w: 3 },
   ]},
   { name: 'health-factor', phrases: [
-    { re: /health\s*factor|healthfactor|\bliquidation\b|\bcollateral\b/i, w: 5 }, { re: /\blending\b|\blend\b|\bloan\b|\bborrow\b|\bdebt\b/i, w: 4 }, { re: /safety\s*enforcement|policyguard|\baave\b|\bcompound\b/i, w: 4 },
+    { re: /health\s*factor|healthfactor|\bliquidation\b|\bcollateral\b/i, w: 5 }, { re: /\blending\b|\blend\b|\bloan\b|\bborrow\b|\bdebt\b/i, w: 4 }, { re: /safety\s*enforcement|policyguard|\baave\b|\bcompound\b/i, w: 4 }, { re: /\bmonitor|security|alert|watchlist|surveillance|observability|track/i, w: 4 },
   ]},
 ];
 
