@@ -24,8 +24,8 @@ async function getMerchant() {
   _merchant = createX402Merchant({
     chainId: 56,
     payTo: facilitator.address,                    // our funded wallet (earnings land here)
-    price: 500000000000000000n,                    // $0.50 (18-dec atomic)
-    minPrice: 500000000000000000n,                 // floor $0.50
+    price: 10000000000000000n,                     // $0.01 (18-dec atomic)
+    minPrice: 10000000000000000n,                  // floor $0.01
     maxPrice: 2000000000000000000n,                // ceiling $2.00
     rails: [
       { rail: 'eip3009', token: U_TOKEN[56] },                                          // Studio buyers ($U)
@@ -34,7 +34,7 @@ async function getMerchant() {
     resource: { url: 'https://ai-rook.com/bnb-marketplace/', description: 'Hire an agent on BNB Agent Studio', mimeType: 'application/json' },
     description: 'Hire an agent on BNB Agent Studio',
     facilitator,
-    rpcUrl: config.rpcList[0],
+    rpcUrl: config.rpcList[1] || 'https://bsc-dataseed1.binance.org',
     chain: bsc,
   });
   return _merchant;

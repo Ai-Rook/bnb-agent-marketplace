@@ -175,6 +175,9 @@ app.post('/api/hire', async (req, res) => {
       settleTx: handle.receipt.txHash,
       payer: handle.receipt.payer,
       network: 'eip155:56',
+      amountUsd: handle.receipt.amount ? (Number(handle.receipt.amount) / 1e18).toString() : '0',
+      currency: handle.receipt.rail && String(handle.receipt.rail).startsWith('permit2') ? 'USDT' : 'U',
+      rail: handle.receipt.rail || '',
     };
 
     // Payment settled — build receipt, store it idempotently, deliver
@@ -190,9 +193,9 @@ app.post('/api/hire', async (req, res) => {
       receipt: {
         hired_at: new Date().toISOString(),
         agent_id: row.agent_id,
-        amount_usd: '0.50',
-        currency: 'USDT',
-        facilitator: config.b402Facilitator,
+        amount_usd: result.amountUsd,
+        currency: result.currency,
+        facilitator: 'self-hosted (Altana)',
         settle_tx: result.settleTx,
         failure_mode: 'Settlement is confirmed on-chain before delivery. If the response is lost in transit, retry with the SAME X-Idempotency-Key header — you will receive the same receipt, not a double charge.',
       },
