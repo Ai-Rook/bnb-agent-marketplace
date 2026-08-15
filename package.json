@@ -10,6 +10,7 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "@altananetwork/x402-server": "^0.2.0",
     "@bnb-chain/b402": "^0.1.0",
     "@x402/core": "^2.19.0",
     "@x402/fetch": "^2.22.0",

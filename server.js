@@ -151,10 +151,12 @@ app.post('/api/hire', async (req, res) => {
       }
     }
 
+    const { requirePayment } = require('./altana');
+
     if (!paymentHeader) {
-      // No payment yet → issue 402 challenge with b402 payment requirements
-      const challenge = b402.paymentChallenge(`Hire agent #${row.agent_id} (${row.name})`);
-      return res.status(402).set('X-PAYMENT-RESPONSE', JSON.stringify(challenge)).json(challenge);
+      // No payment yet → 402 challenge via self-hosted Altana b402 merchant
+      const handle = await requirePayment(null);
+      return res.status(402).set('X-PAYMENT-RESPONSE', JSON.stringify(handle.body)).json(handle.body);
     }
 
     if (idemKey) {
@@ -162,12 +164,18 @@ app.post('/api/hire', async (req, res) => {
         .run(idemKey, row.agent_id, 'pending', new Date().toISOString());
     }
 
-    // Payment header present → verify + settle via b402 facilitator
-    const result = await b402.verifySettle(paymentHeader);
-    if (!result.ok) {
+    // Payment header present → verify + settle on-chain via self-hosted Altana merchant
+    const handle = await requirePayment(paymentHeader);
+    if (handle.status === 402) {
       if (idemKey) db.db.prepare('DELETE FROM hires WHERE idempotency_key = ?').run(idemKey);
-      return res.status(402).json({ error: result.error, status: 'payment_failed' });
+      return res.status(402).set('X-PAYMENT-RESPONSE', JSON.stringify(handle.body)).json(handle.body);
     }
+    const result = {
+      ok: true,
+      settleTx: handle.receipt.txHash,
+      payer: handle.receipt.payer,
+      network: 'eip155:56',
+    };
 
     // Payment settled — build receipt, store it idempotently, deliver
     const receipt = {
