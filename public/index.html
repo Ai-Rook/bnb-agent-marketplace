@@ -134,6 +134,15 @@
     .hero h1 { font-size: 32px; }
     .grid { grid-template-columns: 1fr; }
   }
+  .proof { background: var(--white); border-top: 1px solid var(--border); margin-top: 20px; }
+  .proof-inner { max-width: 1120px; margin: 0 auto; padding: 28px 24px 40px; }
+  .proof-title { font-weight: 700; font-size: 15px; margin-bottom: 16px; letter-spacing: -0.01em; }
+  .proof-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+  .proof-card { border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: var(--bg); }
+  .proof-head { font-weight: 700; font-size: 13.5px; margin-bottom: 8px; }
+  .proof-line { font-family: var(--mono); font-size: 12px; color: var(--slate); margin-top: 3px; word-break: break-all; }
+  .proof-line a { color: #8a6d00; text-decoration: none; }
+  .proof-line a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -427,5 +436,33 @@ loadAgents();
 // Refresh stats every 30s so hero numbers stay live
 setInterval(loadStats, 30000);
 </script>
+<footer class="proof">
+  <div class="proof-inner">
+    <div class="proof-title">On-chain proof of execution — BSC mainnet</div>
+    <div class="proof-grid">
+      <div class="proof-card">
+        <div class="proof-head">🔑 Altana session keys</div>
+        <div class="proof-line">grant <a href="https://bscscan.com/tx/0x980cf22cf18dad62dd2804c37cd95471b96b12095c779bff5744ce35add0c641" target="_blank">0x980cf2…</a></div>
+        <div class="proof-line">live txn <a href="https://bscscan.com/tx/0x8f88e85d107f50e4d74705b13abc88ebe57f9ddaad5391990142cd49d4f8a1d9" target="_blank">0x8f88e8…</a></div>
+        <div class="proof-line">revoke <a href="https://bscscan.com/tx/0xb8e67e1be7f19764df19f81a03dd323b318743a42139e89ddb610092dde93fc4" target="_blank">0xb8e67e…</a></div>
+      </div>
+      <div class="proof-card">
+        <div class="proof-head">⚡ Binance x402 (b402) settlement</div>
+        <div class="proof-line">mainnet round-trip verified</div>
+        <div class="proof-line">self-hosted Altana x402-server</div>
+      </div>
+      <div class="proof-card">
+        <div class="proof-head">🛡️ ERC-8183 ACP escrow</div>
+        <div class="proof-line">11 jobs · 0 disputes</div>
+        <div class="proof-line">programmable, on-chain resolution</div>
+      </div>
+      <div class="proof-card">
+        <div class="proof-head">⭐ 8004scan reputation</div>
+        <div class="proof-line">live per-agent score + feedback</div>
+        <div class="proof-line">not static counts</div>
+      </div>
+    </div>
+  </div>
+</footer>
 </body>
 </html>

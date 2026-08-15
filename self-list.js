@@ -104,7 +104,7 @@ async function main() {
       'Multi-strategy crypto signal engine — live BTC setups, CVD/OI confluence, MA-cross and turtle-soup strategies. ' + strategies.join(', ') + ' currently live.',
       null, 1, 1, JSON.stringify(['reputation']),
       JSON.stringify([{ name: 'health', endpoint: 'http://127.0.0.1:3007/health' }]),
-      'monitoring', 9, 1, null, now, JSON.stringify(usage), 1
+      'grid-trading', 9, 1, null, now, JSON.stringify(usage), 1
     );
     console.log('[self-list] Rook Signal Engine seeded (strategies: ' + strategies.join(', ') + ')');
   }
@@ -135,7 +135,7 @@ async function main() {
       'Real-time MMT-fed market microstructure — CVD, open interest, divergence scoring, and SFP zones across timeframes.',
       null, 1, 1, JSON.stringify(['reputation']),
       JSON.stringify([{ name: 'health', endpoint: 'http://127.0.0.1:3020/health' }]),
-      'monitoring', 8, 1, null, now, JSON.stringify(usage), 1
+      'health-factor', 8, 1, null, now, JSON.stringify(usage), 1
     );
     console.log('[self-list] Aether Orderflow Engine seeded');
   }
@@ -167,7 +167,7 @@ async function main() {
       'Real-time liquidity heatmaps, whale order flow, and cumulative volume delta across BSC/Binance futures. Multi-exchange orderbook visualization.',
       null, 1, 1, JSON.stringify(['reputation']),
       JSON.stringify([{ name: 'health', endpoint: 'http://127.0.0.1:3025/health' }]),
-      'monitoring', 8, 1, null, now, JSON.stringify(usage), 1
+      'health-factor', 8, 1, null, now, JSON.stringify(usage), 1
     );
     console.log('[self-list] MMT Heatmap & Whale Flow seeded');
   }
