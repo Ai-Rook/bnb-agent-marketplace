@@ -79,6 +79,23 @@ db.exec(`
   );
 `);
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS altana_sessions (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    wallet_addr TEXT,
+    public_key  TEXT,
+    permissions TEXT,
+    expiry      INTEGER,
+    registered  INTEGER DEFAULT 0,
+    grant_tx    TEXT,
+    execute_tx  TEXT,
+    revoked     INTEGER DEFAULT 0,
+    revoke_tx   TEXT,
+    created_at  TEXT,
+    updated_at  TEXT
+  );
+`);
+
 const upsertStmt = db.prepare(`
   INSERT INTO agents (agent_id, owner, agent_wallet, agent_uri, uri_kind, name, description, image,
     active, x402_support, supported_trust, services, category, category_score,
@@ -109,10 +126,25 @@ const metaGetStmt = db.prepare('SELECT value FROM meta WHERE key = ?');
 function setMeta(key, value) { metaStmt.run(key, String(value)); }
 function getMeta(key) { const r = metaGetStmt.get(key); return r ? r.value : null; }
 
+const _altanaInsert = db.prepare(`
+  INSERT INTO altana_sessions (wallet_addr, public_key, permissions, expiry, registered, grant_tx, execute_tx, revoked, revoke_tx, created_at, updated_at)
+  VALUES (?,?,?,?,?,?,?,?,?,?,?)
+`);
+function saveAltanaSession(s) {
+  _altanaInsert.run(
+    s.wallet_addr || null, s.public_key || null, JSON.stringify(s.permissions || null),
+    s.expiry || null, s.registered ? 1 : 0, s.grant_tx || null, s.execute_tx || null,
+    s.revoked ? 1 : 0, s.revoke_tx || null, new Date().toISOString(), new Date().toISOString()
+  );
+  return db.prepare('SELECT last_insert_rowid() AS id').get().id;
+}
+function latestAltanaSession() { return db.prepare('SELECT * FROM altana_sessions ORDER BY id DESC LIMIT 1').get(); }
+function listAltanaSessions() { return db.prepare('SELECT * FROM altana_sessions ORDER BY id DESC LIMIT 50').all(); }
+
 function count() { return db.prepare('SELECT COUNT(*) AS c FROM agents').get().c; }
 function countParsed() { return db.prepare('SELECT COUNT(*) AS c FROM agents WHERE parsed_ok=1').get().c; }
 function countX402() { return db.prepare('SELECT COUNT(*) AS c FROM agents WHERE x402_support=1').get().c; }
 
 function close() { try { db.close(); } catch (e) {} }
 
-module.exports = { db, upsertAgent, setMeta, getMeta, count, countParsed, countX402, close };
+module.exports = { db, upsertAgent, setMeta, getMeta, count, countParsed, countX402, close, saveAltanaSession, latestAltanaSession, listAltanaSessions };

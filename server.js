@@ -8,6 +8,7 @@ const db = require('./db');
 const b402 = require('./b402');
 const selfList = require('./self-list');
 const reputation = require('./reputation');
+const altana = require('./altana-session');
 
 const app = express();
 app.use(express.json());
@@ -222,6 +223,55 @@ app.post('/api/hire', async (req, res) => {
 });
 
 // ── Static UI ──────────────────────────────────────────────────────────────
+// ── Altana session keys + Keystore + revoke (buy-side differentiator) ──────────
+app.get('/api/altana/status', (req, res) => {
+  try {
+    const w = altana.currentWallet();
+    const s = altana.currentSession();
+    res.json({ ok: true, network: config.bnbNetwork, wallet: w ? w.address : null, session: altana.sessionPublic(s) });
+  } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
+app.post('/api/altana/wallet', async (req, res) => {
+  try { const { wallet } = await altana.getAgentWallet(); res.json({ ok: true, wallet: wallet.address }); }
+  catch (e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
+app.post('/api/altana/session', async (req, res) => {
+  try {
+    const { calls, spend, expiry } = req.body || {};
+    const session = await altana.grantSession({ calls, spend }, expiry);
+    db.saveAltanaSession({
+      wallet_addr: session.walletAddress, public_key: session.publicKey,
+      permissions: session.permissions, expiry: session.expiry,
+      registered: 1, grant_tx: session.transactionHash || null,
+    });
+    res.json({ ok: true, session: altana.sessionPublic(session), grant_tx: session.transactionHash || null });
+  } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
+app.post('/api/altana/session/register', async (req, res) => {
+  try { const r = await altana.registerSession(); res.json({ ok: true, result: r }); }
+  catch (e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
+app.post('/api/altana/session/execute', async (req, res) => {
+  try {
+    const calls = (req.body && req.body.calls) || altana.selfCall();
+    const r = await altana.executeViaSession(calls);
+    db.saveAltanaSession({ execute_tx: r.transactionHash || r.callsId || null });
+    res.json({ ok: true, result: r });
+  } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
+app.post('/api/altana/session/revoke', async (req, res) => {
+  try {
+    const r = await altana.revokeSession();
+    db.saveAltanaSession({ revoked: 1, revoke_tx: (r && r.transactionHash) || null });
+    res.json({ ok: true, result: r });
+  } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.listen(PORT, '127.0.0.1', () => {
